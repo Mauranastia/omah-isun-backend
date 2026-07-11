@@ -10,8 +10,7 @@ const db = mysql.createConnection({
 
 db.connect((err) => {
   if (err) {
-    console.log("Database gagal terhubung");
-    console.log(err);
+    console.error("Database gagal terhubung:", err);
     return;
   }
 
