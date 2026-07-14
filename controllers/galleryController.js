@@ -10,39 +10,68 @@ exports.getGallery = (req, res) => {
 
 // POST
 exports.addGallery = (req, res) => {
-  const { title, image } = req.body;
+
+  const { title } = req.body;
+
+  const image = req.file ? req.file.filename : null;
 
   db.query(
     "INSERT INTO gallery(title,image) VALUES(?,?)",
     [title, image],
     (err) => {
+
       if (err) return res.status(500).json(err);
 
       res.json({
         message: "Galeri berhasil ditambahkan",
       });
+
     }
   );
+
 };
 
 // PUT
 exports.updateGallery = (req, res) => {
+
   const { id } = req.params;
-  const { title, image } = req.body;
+  const { title } = req.body;
 
-  db.query(
-    "UPDATE gallery SET title=?, image=? WHERE id=?",
-    [title, image, id],
-    (err) => {
-      if (err) return res.status(500).json(err);
+  if (req.file) {
 
-      res.json({
-        message: "Galeri berhasil diupdate",
-      });
-    }
-  );
+    db.query(
+      "UPDATE gallery SET title=?, image=? WHERE id=?",
+      [title, req.file.filename, id],
+      (err) => {
+
+        if (err) return res.status(500).json(err);
+
+        res.json({
+          message: "Galeri berhasil diupdate",
+        });
+
+      }
+    );
+
+  } else {
+
+    db.query(
+      "UPDATE gallery SET title=? WHERE id=?",
+      [title, id],
+      (err) => {
+
+        if (err) return res.status(500).json(err);
+
+        res.json({
+          message: "Galeri berhasil diupdate",
+        });
+
+      }
+    );
+
+  }
+
 };
-
 // DELETE
 exports.deleteGallery = (req, res) => {
   const { id } = req.params;
