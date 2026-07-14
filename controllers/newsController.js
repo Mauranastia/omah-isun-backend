@@ -42,14 +42,16 @@ exports.getNewsById = (req, res) => {
 // TAMBAH BERITA
 // ===============================
 exports.createNews = (req, res) => {
+
   const {
     title,
     date,
     description,
     content,
-    image,
     category,
   } = req.body;
+
+  const image = req.file ? req.file.filename : null;
 
   const sql = `
     INSERT INTO news
@@ -67,7 +69,8 @@ exports.createNews = (req, res) => {
       image,
       category,
     ],
-    (err, result) => {
+    (err) => {
+
       if (err) {
         return res.status(500).json(err);
       }
@@ -75,14 +78,17 @@ exports.createNews = (req, res) => {
       res.json({
         message: "Berita berhasil ditambahkan",
       });
+
     }
   );
+
 };
 
 // ===============================
 // UPDATE BERITA
 // ===============================
 exports.updateNews = (req, res) => {
+
   const { id } = req.params;
 
   const {
@@ -90,43 +96,81 @@ exports.updateNews = (req, res) => {
     date,
     description,
     content,
-    image,
     category,
   } = req.body;
 
-  const sql = `
-    UPDATE news
-    SET
-      title=?,
-      date=?,
-      description=?,
-      content=?,
-      image=?,
-      category=?
-    WHERE id=?
-  `;
+  if (req.file) {
 
-  db.query(
-    sql,
-    [
-      title,
-      date,
-      description,
-      content,
-      image,
-      category,
-      id,
-    ],
-    (err, result) => {
-      if (err) {
-        return res.status(500).json(err);
+    const sql = `
+      UPDATE news
+      SET
+        title=?,
+        date=?,
+        description=?,
+        content=?,
+        image=?,
+        category=?
+      WHERE id=?
+    `;
+
+    db.query(
+      sql,
+      [
+        title,
+        date,
+        description,
+        content,
+        req.file.filename,
+        category,
+        id,
+      ],
+      (err) => {
+
+        if (err) return res.status(500).json(err);
+
+        res.json({
+          message: "Berita berhasil diperbarui",
+        });
+
       }
+    );
 
-      res.json({
-        message: "Berita berhasil diperbarui",
-      });
-    }
-  );
+  } else {
+
+    const sql = `
+      UPDATE news
+      SET
+        title=?,
+        date=?,
+        description=?,
+        content=?,
+        category=?
+      WHERE id=?
+    `;
+
+    db.query(
+      sql,
+      [
+        title,
+        date,
+        description,
+        content,
+        category,
+        id,
+      ],
+      (err) => {
+
+        if (err) return res.status(500).json(err);
+
+        res.json({
+          message: "Berita berhasil diperbarui",
+        });
+
+      }
+    );
+
+  }
+
 };
 
 // ===============================
