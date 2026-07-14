@@ -22,10 +22,13 @@ exports.getRoom = (req, res) => {
 
 // Tambah kamar
 exports.createRoom = (req, res) => {
-  const { name, capacity, description, facilities, image } = req.body;
+  const { name, capacity, description, facilities } = req.body;
+
+  const image = req.file ? req.file.filename : null;
+
   db.query(
-    "INSERT INTO rooms(name,capacity,description,facilities,image) VALUES (?,?,?,?,?)",
-    [name,capacity,description,facilities,image],
+    "INSERT INTO rooms(name, capacity, description, facilities, image) VALUES (?,?,?,?,?)",
+    [name, capacity, description, facilities, image],
     (err) => {
       if (err) return res.status(500).json(err);
 
@@ -43,27 +46,46 @@ exports.updateRoom = (req, res) => {
     capacity,
     description,
     facilities,
-    image,
   } = req.body;
 
-  db.query(
-    "UPDATE rooms SET name=?, capacity=?, description=?, facilities=?, image=? WHERE id=?",
-    [
-      name,
-      capacity,
-      description,
-      facilities,
-      image,
-      req.params.id,
-    ],
-    (err) => {
-      if (err) return res.status(500).json(err);
+  if (req.file) {
+    db.query(
+      "UPDATE rooms SET name=?, capacity=?, description=?, facilities=?, image=? WHERE id=?",
+      [
+        name,
+        capacity,
+        description,
+        facilities,
+        req.file.filename,
+        req.params.id,
+      ],
+      (err) => {
+        if (err) return res.status(500).json(err);
 
-      res.json({
-        message: "Kamar berhasil diubah",
-      });
-    }
-  );
+        res.json({
+          message: "Kamar berhasil diubah",
+        });
+      }
+    );
+  } else {
+    db.query(
+      "UPDATE rooms SET name=?, capacity=?, description=?, facilities=? WHERE id=?",
+      [
+        name,
+        capacity,
+        description,
+        facilities,
+        req.params.id,
+      ],
+      (err) => {
+        if (err) return res.status(500).json(err);
+
+        res.json({
+          message: "Kamar berhasil diubah",
+        });
+      }
+    );
+  }
 };
 // Hapus kamar
 exports.deleteRoom = (req, res) => {
